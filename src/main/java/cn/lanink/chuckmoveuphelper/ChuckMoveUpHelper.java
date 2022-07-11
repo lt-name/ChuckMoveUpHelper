@@ -22,7 +22,7 @@ import java.util.concurrent.ConcurrentHashMap;
  */
 public class ChuckMoveUpHelper extends PluginBase {
 
-    private Set<Vector2> modifyChuck = Collections.newSetFromMap(new ConcurrentHashMap<>());
+    private final Set<Vector2> modifyChuck = Collections.newSetFromMap(new ConcurrentHashMap<>());
 
     @Override
     public void onEnable() {
@@ -41,10 +41,30 @@ public class ChuckMoveUpHelper extends PluginBase {
         }
 
         boolean isUp = true;
+        int movedY = 0;
         if (args.length > 0) {
-            if (args[0].equals("down")) {
+            if (args[0].equalsIgnoreCase("up")) {
+                isUp = true;
+            }else if (args[0].equalsIgnoreCase("down")) {
                 isUp = false;
+            }else {
+                try {
+                    movedY = Integer.parseInt(args[0]);
+                } catch (NumberFormatException e) {
+                    sender.sendMessage("请输入正确的数字！");
+                    return false;
+                }
             }
+        }
+
+        if (movedY == 0) {
+            movedY = (isUp ? 64 : -64);
+        }
+
+        if (movedY >= 0) {
+            isUp = true;
+        }else {
+            isUp = false;
         }
 
         Player player = (Player) sender;
@@ -55,19 +75,20 @@ public class ChuckMoveUpHelper extends PluginBase {
             return true;
         }
         this.modifyChuck.add(vector2);
-        sender.sendMessage("正在尝试修改区块(所有方块y"+ (isUp ? "+64" : "-64") + ")，请稍后...");
+        sender.sendMessage("正在尝试修改区块(所有方块y移动"+ movedY + ")，请稍后...");
 
         final boolean finalIsUp = isUp;
+        final int finalMovedY = movedY;
         this.getServer().getScheduler().scheduleAsyncTask(this, new AsyncTask() {
             @Override
             public void onRun() {
                 if (finalIsUp) {
                     for (int y = 255; y >= -64; y--) {
-                        moveLayerBlock(level, vector2, y, 64);
+                        moveLayerBlock(level, vector2, y, finalMovedY);
                     }
                 }else {
                     for (int y = 0; y <= 384; y++) {
-                        moveLayerBlock(level, vector2, y, -64);
+                        moveLayerBlock(level, vector2, y, finalMovedY);
                     }
                 }
                 modifyChuck.remove(vector2);

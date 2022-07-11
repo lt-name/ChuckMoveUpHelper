@@ -9,7 +9,7 @@ load: POSTWORLD
 commands:
   ChuckMoveUp:
     description: 拉高区块
-    usage: /ChuckMoveUp
+    usage: /ChuckMoveUp [up|down|移动Y]
     permission: ChuckMoveUpHelper.admin
 permissions:
   ChuckMoveUpHelper.admin:
