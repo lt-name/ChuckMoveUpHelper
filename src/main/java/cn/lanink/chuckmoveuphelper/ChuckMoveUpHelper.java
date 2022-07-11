@@ -4,6 +4,9 @@ import cn.nukkit.Player;
 import cn.nukkit.block.Block;
 import cn.nukkit.command.Command;
 import cn.nukkit.command.CommandSender;
+import cn.nukkit.event.EventHandler;
+import cn.nukkit.event.Listener;
+import cn.nukkit.event.player.PlayerQuitEvent;
 import cn.nukkit.level.Level;
 import cn.nukkit.math.Vector2;
 import cn.nukkit.math.Vector3;
@@ -12,7 +15,6 @@ import cn.nukkit.scheduler.AsyncTask;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
-import org.checkerframework.checker.units.qual.A;
 
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
@@ -20,14 +22,20 @@ import java.util.concurrent.ConcurrentHashMap;
 /**
  * @author LT_Name
  */
-public class ChuckMoveUpHelper extends PluginBase {
+public class ChuckMoveUpHelper extends PluginBase implements Listener {
 
     private final Set<Vector2> modifyChuck = Collections.newSetFromMap(new ConcurrentHashMap<>());
     private final HashMap<Player, PlayerCloseRegion> playerChoosePos = new HashMap<>();
 
     @Override
     public void onEnable() {
+        this.getServer().getPluginManager().registerEvents(this, this);
+    }
 
+    @EventHandler
+    public void onPlayerQuit(PlayerQuitEvent event) {
+        Player player = event.getPlayer();
+        this.playerChoosePos.remove(player);
     }
 
     @Override
