@@ -40,7 +40,12 @@ public class ChuckMoveUpHelper extends PluginBase {
             return true;
         }
 
-        boolean up = true;
+        boolean isUp = true;
+        if (args.length > 0) {
+            if (args[0].equals("down")) {
+                isUp = false;
+            }
+        }
 
         Player player = (Player) sender;
         Level level = player.getLevel();
@@ -50,32 +55,62 @@ public class ChuckMoveUpHelper extends PluginBase {
             return true;
         }
         this.modifyChuck.add(vector2);
-        sender.sendMessage("正在尝试修改区块，请稍后...");
+        sender.sendMessage("正在尝试修改区块(所有方块y"+ (isUp ? "+64" : "-64") + ")，请稍后...");
+
+        final boolean finalIsUp = isUp;
         this.getServer().getScheduler().scheduleAsyncTask(this, new AsyncTask() {
             @Override
             public void onRun() {
-                LinkedList<BlockData> list = new LinkedList<>();
-                for (int y = 255; y > -64; y--) {
-                    for (int x = 0; x < 16; x++) {
-                        final int finalX = x;
-                        final int finalY = y;
-                        for (int z = 0; z < 16; z++) {
-                            Vector3 vector3 = new Vector3(vector2.x + finalX, finalY, vector2.y + z);
-                            Block block = level.getBlock(vector3);
-                            list.add(new BlockData(vector3, block));
-                            level.setBlock(vector3.add(0, up ? 64 : -64, 0), block);
-                        }
+                if (finalIsUp) {
+                    for (int y = 255; y >= -64; y--) {
+                        moveLayerBlock(level, vector2, y, 64);
                     }
-                }
-                while (!list.isEmpty()) {
-                    BlockData blockData = list.pollLast();
-                    level.setBlock(blockData.vector3.add(0, up ? 64 : -64, 0), blockData.block);
+                }else {
+                    for (int y = 0; y <= 384; y++) {
+                        moveLayerBlock(level, vector2, y, -64);
+                    }
                 }
                 modifyChuck.remove(vector2);
                 sender.sendMessage("区块修改完成！");
             }
         });
         return true;
+    }
+
+    private void moveLayerBlock(Level level, Vector2 vector2, int y, int movedY) {
+        for (int x = 0; x < 16; x++) {
+            for (int z = 0; z < 16; z++) {
+                Vector3 vector3 = new Vector3(vector2.x + x, y, vector2.y + z);
+                moveBlock(level, vector3, movedY);
+            }
+        }
+    }
+
+    private void moveBlock(Level level, Vector3 pos, int movedY) {
+        level.setBlockStateAt(
+                pos.getFloorX(),
+                pos.getFloorY() + movedY,
+                pos.getFloorZ(),
+                0,
+                level.getBlockStateAt(
+                        pos.getFloorX(),
+                        pos.getFloorY(),
+                        pos.getFloorZ(),
+                        0
+                )
+        );
+        level.setBlockStateAt(
+                pos.getFloorX(),
+                pos.getFloorY() + movedY,
+                pos.getFloorZ(),
+                1,
+                level.getBlockStateAt(
+                        pos.getFloorX(),
+                        pos.getFloorY(),
+                        pos.getFloorZ(),
+                        1
+                )
+        );
     }
 
     @Data
