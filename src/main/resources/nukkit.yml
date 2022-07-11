@@ -1,0 +1,17 @@
+name: ChuckMoveUpHelper
+main: cn.lanink.chuckmoveuphelper.ChuckMoveUpHelper
+version: "1.0.0-SNAPSHOT"
+api:
+  - "1.0.11"
+author: LT_Name
+load: POSTWORLD
+
+commands:
+  ChuckMoveUp:
+    description: 拉高区块
+    usage: /ChuckMoveUp
+    permission: ChuckMoveUpHelper.admin
+permissions:
+  ChuckMoveUpHelper.admin:
+    default: op
+    description: "ChuckMoveUpHelper插件主命令"
